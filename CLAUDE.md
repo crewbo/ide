@@ -20,7 +20,19 @@ Source precedence: Ronel's explicit instructions > PRD > accepted ADRs > researc
 
 ## Current state
 
-Planned, nothing built. Licence: MIT (Ronel, 2026-10-20). Work happens in the order of M8-01 to M8-05.
+Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Not yet: macOS and Windows packages (M8-02), signing and first-run defaults (M8-03; the Welcome tab still shows VSCodium's logo and VS Code's tagline, and the crew panel is not open on first run). Licence: MIT (Ronel, 2026-10-20).
+
+## Commands
+
+| Purpose | Command |
+| --- | --- |
+| Toolchain (Node, Python 3.11, Rust, pinned for VSCodium) | `mise install` (versions in `mise.toml`) |
+| Build for this machine | `CREWBO_VSIX=/path/to/crewbo-<version>.vsix ./build.sh` (about 13 minutes on a 12-core laptop) |
+| Run the build | `./build/vscodium/VSCode-linux-x64/bin/crewbo-ide` |
+| Update VSCodium | change `VSCODIUM_REF` to a newer VSCodium commit, rebuild, check |
+| Update brand icons | change `CREWBO_REF` to a crewbo/crewbo commit |
+
+`build.sh` sources VSCodium's scripts (`get_repo.sh`, `version.sh`, `build.sh`) with its own environment (`APP_NAME=CrewboIDE`, `BINARY_NAME=crewbo-ide`, `DISABLE_UPDATE=yes`). They read unset variables, so `set -u` is off around them. Their output lands in `build/vscodium/VSCode-<os>-<arch>/`.
 
 ## Non-negotiable rules
 

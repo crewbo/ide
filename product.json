@@ -1,0 +1,37 @@
+{
+  "nameShort": "Crewbo IDE",
+  "nameLong": "Crewbo IDE",
+  "applicationName": "crewbo-ide",
+  "linuxIconName": "crewbo-ide",
+  "dataFolderName": ".crewbo-ide",
+  "urlProtocol": "crewbo-ide",
+  "serverApplicationName": "crewbo-ide-server",
+  "serverDataFolderName": ".crewbo-ide-server",
+  "tunnelApplicationName": "crewbo-ide-tunnel",
+  "win32TunnelServiceMutex": "crewbo-ide-tunnelservice",
+  "win32TunnelMutex": "crewbo-ide-tunnel",
+  "darwinBundleIdentifier": "dev.crewbo.ide",
+  "win32AppUserModelId": "Crewbo.CrewboIDE",
+  "win32DirName": "Crewbo IDE",
+  "win32MutexName": "crewboide",
+  "win32NameVersion": "Crewbo IDE",
+  "win32RegValueName": "CrewboIDE",
+  "win32ShellNameShort": "Crewbo IDE",
+  "win32AppId": "{{518B112D-D17C-4A85-9E7C-D5A8E6F982CE}",
+  "win32x64AppId": "{{1891BAB0-B4A9-42C9-BCF9-860E2E7D7791}",
+  "win32arm64AppId": "{{36709638-A66D-4E0A-A978-3FF8CDFBBFC3}",
+  "win32UserAppId": "{{7918F796-D68C-4D26-8167-B3C96D4DE1B3}",
+  "win32x64UserAppId": "{{78CCBF19-35BF-4940-84A7-7303A7D99AFD}",
+  "win32arm64UserAppId": "{{6D18C521-CE4E-4E6A-BBF9-292FAC7FBB0F}",
+  "win32ContextMenu": {
+    "x64": {
+      "clsid": "687CD68E-B932-4384-882E-96C94F15D7D9"
+    },
+    "arm64": {
+      "clsid": "35123F97-11CE-434D-A458-A89DC7EBBF24"
+    }
+  },
+  "licenseUrl": "https://github.com/crewbo/ide/blob/main/LICENSE",
+  "reportIssueUrl": "https://github.com/crewbo/crewbo/issues/new",
+  "downloadUrl": "https://github.com/crewbo/ide/releases"
+}
