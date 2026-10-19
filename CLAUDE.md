@@ -20,7 +20,7 @@ Source precedence: Ronel's explicit instructions > PRD > accepted ADRs > researc
 
 ## Current state
 
-Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Since M8-03 (2026-10-20): Crewbo's mark in the title bar and on the Welcome tab (black on light themes, white on dark), the tagline on the Welcome page, and the crew panel open on first run (the extension does that when `env.appName` is "Crewbo IDE"). Not yet: macOS and Windows packages (M8-02), signing (M8-03), the macOS `.icns`. Still VSCodium's: the empty-editor watermark (`letterpress-*.svg`), and "CrewboIDE" without a space in strings VSCodium's patches fill from `APP_NAME`. Licence: MIT (Ronel, 2026-10-20).
+Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Since M8-03 (2026-10-20): Crewbo's mark in the title bar and on the Welcome tab (black on light themes, white on dark), the tagline on the Welcome page, and the crew panel open on first run (the extension does that when `env.appName` is "Crewbo IDE"). Not yet: macOS and Windows packages (M8-02), signing (M8-03), the macOS `.icns`. The empty-editor watermark is the mark drawn faint (brand BDR-021). Still VSCodium's: "CrewboIDE" without a space in strings VSCodium's patches fill from `APP_NAME`. Licence: MIT (Ronel, 2026-10-20).
 
 ## Commands
 

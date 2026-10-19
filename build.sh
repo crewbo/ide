@@ -48,6 +48,13 @@ for tone in black white; do
 done
 cp "$icons/mark-black.svg" src/stable/src/vs/workbench/browser/media/code-icon.svg
 cp "$icons/mark-white.svg" src/stable/src/vs/workbench/browser/media/code-icon-dark.svg
+# The empty-editor watermark is the same mark, drawn faint by
+# patches/watermark.patch (brand BDR-021).
+letterpress=src/stable/src/vs/workbench/browser/parts/editor/media
+cp "$icons/mark-black.svg" "$letterpress/letterpress-light.svg"
+cp "$icons/mark-black.svg" "$letterpress/letterpress-hcLight.svg"
+cp "$icons/mark-white.svg" "$letterpress/letterpress-dark.svg"
+cp "$icons/mark-white.svg" "$letterpress/letterpress-hcDark.svg"
 # ponytail: macOS keeps VSCodium's code.icns until M8-02 builds on macOS
 # (iconutil there turns the 1024 px icon into an .icns).
 
