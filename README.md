@@ -2,7 +2,18 @@
 
 The Crewbo IDE is a code editor with [Crewbo](https://github.com/crewbo/crewbo) built in: Code OSS (the open source core of VS Code) with Crewbo's extension, its crew panel open from the first run, and telemetry off. Each teammate prompts their own agent (Claude Code, Codex) in the editor while the crew panel shows who is working on what.
 
-**Status: planned.** Nothing is built yet. The IDE ships as a **preview** with Crewbo's first public release (about 22 November 2026); the Crewbo extension for VS Code, Cursor and other VS Code-based editors stays the main way to use Crewbo.
+**Status: in development.** It builds on Linux (M8-01); packages for all three systems come next. The IDE ships as a **preview** with Crewbo's first public release (about 22 November 2026); the Crewbo extension for VS Code, Cursor and other VS Code-based editors stays the main way to use Crewbo.
+
+## Building it
+
+On Linux (macOS and Windows: M8-02), with VSCodium's [build dependencies](https://github.com/VSCodium/vscodium/blob/master/docs/howto-build.md) and the toolchain in `mise.toml` (Node, Python 3.11, Rust; `mise install`):
+
+```sh
+CREWBO_VSIX=/path/to/crewbo-<version>.vsix ./build.sh
+./build/vscodium/VSCode-linux-x64/bin/crewbo-ide
+```
+
+`build.sh` checks out VSCodium's scripts at `VSCODIUM_REF`, merges `product.json` (Crewbo's name, folders and app IDs) over theirs, takes the app icons from Crewbo's brand at `CREWBO_REF`, switches updates off, builds, and puts the Crewbo extension in the app's built-in extensions. A build took about 13 minutes on a 12-core laptop.
 
 ## How it is built
 
