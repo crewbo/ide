@@ -20,7 +20,7 @@ Source precedence: Ronel's explicit instructions > PRD > accepted ADRs > researc
 
 ## Current state
 
-Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Not yet: macOS and Windows packages (M8-02), signing and first-run defaults (M8-03; the Welcome tab still shows VSCodium's logo and VS Code's tagline, and the crew panel is not open on first run). Licence: MIT (Ronel, 2026-10-20).
+Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Since M8-03 (2026-10-20): Crewbo's mark in the title bar and on the Welcome tab (black on light themes, white on dark), the tagline on the Welcome page, and the crew panel open on first run (the extension does that when `env.appName` is "Crewbo IDE"). Not yet: macOS and Windows packages (M8-02), signing (M8-03), the macOS `.icns`. Still VSCodium's: the empty-editor watermark (`letterpress-*.svg`), and "CrewboIDE" without a space in strings VSCodium's patches fill from `APP_NAME`. Licence: MIT (Ronel, 2026-10-20).
 
 ## Commands
 
@@ -33,6 +33,8 @@ Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open
 | Update brand icons | change `CREWBO_REF` to a crewbo/crewbo commit |
 
 `build.sh` sources VSCodium's scripts (`get_repo.sh`, `version.sh`, `build.sh`) with its own environment (`APP_NAME=CrewboIDE`, `BINARY_NAME=crewbo-ide`, `DISABLE_UPDATE=yes`). They read unset variables, so `set -u` is off around them. Their output lands in `build/vscodium/VSCode-<os>-<arch>/`.
+
+Changes to Code OSS itself are patch files in `patches/` (`git diff` format against the source after VSCodium's own patches). `build.sh` copies them into VSCodium's `patches/user/`, which `prepare_vscode.sh` applies last. Brand files that replace Code OSS files go into VSCodium's `src/stable/` overlay, which `prepare_vscode.sh` copies over the source; copying straight into `vscode/` is overwritten.
 
 ## Non-negotiable rules
 
