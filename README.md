@@ -27,10 +27,10 @@ Issues live in the main repository, milestone [M8: Crewbo IDE preview](https://g
 
 | Issue | What |
 | --- | --- |
-| [M8-01](https://github.com/crewbo/crewbo/issues/191) | Build from VSCodium's scripts: Crewbo's `product.json`, icons, the Crewbo extension built in |
-| [M8-02](https://github.com/crewbo/crewbo/issues/192) | Packages from CI: Linux (`tar.gz`, `deb`, AppImage), macOS (arm64, x64), Windows (x64), with checksums and attestations |
-| [M8-03](https://github.com/crewbo/crewbo/issues/193) | Signing and first-run defaults (Windows through SignPath Foundation if approved; macOS unsigned for the preview) |
-| [M8-04](https://github.com/crewbo/crewbo/issues/194) | IDE docs and download page |
+| [M8-01](https://github.com/crewbo/crewbo/issues/192) | Build from VSCodium's scripts: Crewbo's `product.json`, icons, the Crewbo extension built in |
+| [M8-02](https://github.com/crewbo/crewbo/issues/193) | Packages from CI: Linux (`tar.gz`, `deb`, AppImage), macOS (arm64, x64), Windows (x64), with checksums and attestations |
+| [M8-03](https://github.com/crewbo/crewbo/issues/194) | Signing and first-run defaults (Windows through SignPath Foundation if approved; macOS unsigned for the preview) |
+| [M8-04](https://github.com/crewbo/crewbo/issues/195) | IDE docs and download page |
 | [M8-05](https://github.com/crewbo/crewbo/issues/205) | Agent extensions (Claude Code, Codex) where Open VSX and their licences allow |
 
 ## Contributing and licence
