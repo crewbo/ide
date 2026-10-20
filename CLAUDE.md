@@ -20,7 +20,7 @@ Source precedence: Ronel's explicit instructions > PRD > accepted ADRs > researc
 
 ## Current state
 
-Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Since M8-03 (2026-10-20): Crewbo's mark in the title bar and on the Welcome tab (black on light themes, white on dark), the tagline on the Welcome page, and the crew panel open on first run (the extension does that when `env.appName` is "Crewbo IDE"). Not yet: macOS and Windows packages (M8-02), signing (M8-03), the macOS `.icns`. The empty-editor watermark is the mark drawn faint (brand BDR-021). Still VSCodium's: "CrewboIDE" without a space in strings VSCodium's patches fill from `APP_NAME`. Licence: MIT (Ronel, 2026-10-20).
+Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open VSX, updates off, the Crewbo extension built in. Since M8-03 (2026-10-20): Crewbo's mark in the title bar and on the Welcome tab (black on light themes, white on dark), the tagline on the Welcome page, and the crew panel open on first run (the extension does that when `env.appName` is "Crewbo IDE"). Since M8-02: `.github/workflows/release.yml` builds all packages in CI (pull requests that touch the build run it without a release; a `v*` tag makes a draft release with `checksums.txt` and attestations), and `build.sh` makes the macOS `.icns` with `iconutil`. Not yet: signing (Windows through SignPath once a release exists; macOS stays unsigned, Ronel 2026-10-20). The empty-editor watermark is the mark drawn faint (brand BDR-021). Still VSCodium's: "CrewboIDE" without a space in strings VSCodium's patches fill from `APP_NAME`. Licence: MIT (Ronel, 2026-10-20).
 
 ## Commands
 
@@ -29,6 +29,8 @@ Builds and runs on Linux (M8-01, 2026-10-20): name, folders, app IDs, icon, Open
 | Toolchain (Node, Python 3.11, Rust, pinned for VSCodium) | `mise install` (versions in `mise.toml`) |
 | Build for this machine | `CREWBO_VSIX=/path/to/crewbo-<version>.vsix ./build.sh` (about 13 minutes on a 12-core laptop) |
 | Run the build | `./build/vscodium/VSCode-linux-x64/bin/crewbo-ide` |
+| Build and package | `CREWBO_ASSETS=yes CREWBO_VSIX=... ./build.sh` (packages in `build/vscodium/assets/`: Linux tar.gz and deb, macOS zip, Windows user installer and zip; the AppImage is made in CI only) |
+| Release | push a tag `v*` (Ronel); CI builds everything and creates a draft release to check and publish |
 | Update VSCodium | change `VSCODIUM_REF` to a newer VSCodium commit, rebuild, check |
 | Update brand icons | change `CREWBO_REF` to a crewbo/crewbo commit |
 

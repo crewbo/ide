@@ -1,0 +1,191 @@
+name: release
+
+# Builds the Crewbo IDE for Linux (tar.gz, deb, AppImage), macOS (arm64, x64;
+# zip) and Windows (x64; user installer, zip) with build.sh (M8-02). A tag
+# v* also creates a draft release with checksums.txt and attestations. Pull
+# requests that change the build run every job except the release.
+# Runner labels and tools: https://github.com/actions/runner-images
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - build.sh
+      - product.json
+      - patches/**
+      - VSCODIUM_REF
+      - CREWBO_REF
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vsix:
+    # The Crewbo extension built in, from crewbo/crewbo at CREWBO_REF.
+    runs-on: ubuntu-latest
+    outputs:
+      vscodium_ref: ${{ steps.refs.outputs.vscodium_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: refs
+        run: |
+          echo "crewbo_ref=$(cat CREWBO_REF)" >> "$GITHUB_OUTPUT"
+          echo "vscodium_ref=$(cat VSCODIUM_REF)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: crewbo/crewbo
+          ref: ${{ steps.refs.outputs.crewbo_ref }}
+          path: crewbo
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "26"
+      - name: Package the extension
+        working-directory: crewbo/extension
+        run: |
+          npm ci --ignore-scripts
+          npm run package
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vsix
+          path: crewbo/extension/*.vsix
+          retention-days: 3
+
+  build:
+    needs: vsix
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x64, runner: ubuntu-22.04 }
+          - { name: darwin-arm64, runner: macos-15 }
+          - { name: darwin-x64, runner: macos-15-intel }
+          - { name: win32-x64, runner: windows-2022 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 240
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      release_version: ${{ steps.build.outputs.release_version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # VSCodium's .nvmrc at VSCODIUM_REF; keep in step with mise.toml.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24.18.0"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -y && sudo apt-get install -y libkrb5-dev dpkg-dev fakeroot
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vsix
+          path: vsix
+      - name: Build and package
+        id: build
+        env:
+          CREWBO_ASSETS: "yes"
+          # VSCodium's scripts call the GitHub API; a token avoids rate limits.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          CREWBO_VSIX=$(ls "$PWD"/vsix/*.vsix) ./build.sh
+      - name: Keep the Linux app for the AppImage
+        if: matrix.name == 'linux-x64'
+        run: tar -czf vscode-bin.tar.gz -C build/vscodium/VSCode-linux-x64 .
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: matrix.name == 'linux-x64'
+        with:
+          name: vscode-bin-linux-x64
+          path: vscode-bin.tar.gz
+          retention-days: 1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: assets-${{ matrix.name }}
+          path: build/vscodium/assets/*
+          if-no-files-found: error
+          retention-days: 7
+
+  appimage:
+    # VSCodium's AppImage script and container at VSCODIUM_REF, with Crewbo's
+    # icon instead of VSCodium's SVG and without its self-updater (updates
+    # are off, ADR 0016).
+    needs: [vsix, build]
+    runs-on: ubuntu-latest
+    container: ghcr.io/pkgforge-dev/archlinux:v2026.08.31
+    env:
+      APP_NAME: CrewboIDE
+      VSCODE_QUALITY: stable
+      RELEASE_VERSION: ${{ needs.build.outputs.release_version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: VSCodium/vscodium
+          ref: ${{ needs.vsix.outputs.vscodium_ref }}
+          persist-credentials: false
+      - uses: pkgforge-dev/anylinux-setup-action@b2d1ce4216f71162e00ae58fa11ee9aeb723d0d5 # v5
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vscode-bin-linux-x64
+      - name: Make the AppImage
+        run: |
+          # The app's own icon, which build.sh put in the build.
+          tar -xzf vscode-bin.tar.gz ./resources/app/resources/linux/code.png
+          cp resources/app/resources/linux/code.png src/stable/resources/linux/code.png
+          sed -i \
+            -e 's|resources/linux/code.svg|resources/linux/code.png|' \
+            -e 's|ADD_HOOKS="self-updater.hook:fix-namespaces.hook"|ADD_HOOKS="fix-namespaces.hook"|' \
+            build/linux/anylinux-appimage/build.sh
+          grep -q 'code.png' build/linux/anylinux-appimage/build.sh
+          grep -q 'ADD_HOOKS="fix-namespaces.hook"' build/linux/anylinux-appimage/build.sh
+          ./build/linux/anylinux-appimage/build.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: assets-appimage-x64
+          path: dist/*.AppImage
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, appimage]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Artifact attestations (Sigstore, keyless) for every file in checksums.txt.
+      # https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: assets-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum -- * > checksums.txt && cat checksums.txt
+      # Verify a download with: gh attestation verify FILE -R crewbo/ide
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: dist/checksums.txt
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --draft \
+            --title "Crewbo IDE $GITHUB_REF_NAME (preview)" \
+            --notes "Preview build. macOS builds are not signed: open the app once, then choose Open Anyway in System Settings, Privacy and Security. Windows builds are not signed yet: choose More info, then Run anyway."
