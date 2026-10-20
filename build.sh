@@ -6,7 +6,9 @@
 #
 #   CREWBO_VSIX=/path/to/crewbo-<version>.vsix ./build.sh
 #
-# Output: build/vscodium/VSCode-<os>-<arch>/ (VSCodium's folder name).
+# Output: build/vscodium/VSCode-<os>-<arch>/ (VSCodium's folder name). With
+# CREWBO_ASSETS=yes it also packages that folder into build/vscodium/assets/
+# (M8-02): Linux tar.gz and deb, macOS zip, Windows user installer and zip.
 # Needs VSCodium's build dependencies:
 # https://github.com/VSCodium/vscodium/blob/master/docs/howto-build.md
 set -euo pipefail
@@ -16,6 +18,16 @@ work="$here/build"
 vsix=${CREWBO_VSIX:?set CREWBO_VSIX to the Crewbo extension .vsix}
 vscodium_ref=$(cat "$here/VSCODIUM_REF")
 crewbo_ref=$(cat "$here/CREWBO_REF")
+
+case "$(uname -s)" in
+  Darwin) export OS_NAME="osx" ;;
+  MINGW* | MSYS* | CYGWIN*) export OS_NAME="windows" ;;
+  *) export OS_NAME="linux" ;;
+esac
+case "$(uname -m)" in
+  aarch64 | arm64) export VSCODE_ARCH="arm64" ;;
+  *) export VSCODE_ARCH="x64" ;;
+esac
 
 mkdir -p "$work"
 if [[ ! -d "$work/vscodium/.git" ]]; then
@@ -30,7 +42,8 @@ git checkout -q --force "$vscodium_ref"
 jq -s '.[0] * .[1]' product.json "$here/product.json" > product.json.crewbo
 mv product.json.crewbo product.json
 
-# App icons from Crewbo's brand assets, unchanged.
+# App icons from Crewbo's brand assets, unchanged; each OS's format is made
+# from the PNGs on that OS.
 brand="https://raw.githubusercontent.com/crewbo/crewbo/${crewbo_ref}/docs/brand/assets/png"
 icons="$work/icons"
 mkdir -p "$icons"
@@ -38,7 +51,23 @@ for size in 256 512 1024; do
   curl -fsSL "$brand/app-icon-${size}.png" -o "$icons/app-icon-${size}.png"
 done
 cp "$icons/app-icon-512.png" src/stable/resources/linux/code.png
-magick "$icons/app-icon-256.png" -define icon:auto-resize=256,128,64,48,32,16 src/stable/resources/win32/code.ico
+case "$OS_NAME" in
+  windows)
+    magick "$icons/app-icon-256.png" -define icon:auto-resize=256,128,64,48,32,16 src/stable/resources/win32/code.ico
+    ;;
+  osx)
+    # iconutil turns a .iconset folder of these ten sizes into an .icns.
+    # UNVERIFIED until the first macOS CI run (Apple's iconset page moved);
+    # if iconutil fails, delete this branch and VSCodium's code.icns stays.
+    set_dir="$icons/code.iconset"
+    rm -rf "$set_dir" && mkdir -p "$set_dir"
+    for size in 16 32 128 256 512; do
+      sips -z "$size" "$size" "$icons/app-icon-1024.png" --out "$set_dir/icon_${size}x${size}.png" > /dev/null
+      sips -z $((size * 2)) $((size * 2)) "$icons/app-icon-1024.png" --out "$set_dir/icon_${size}x${size}@2x.png" > /dev/null
+    done
+    iconutil -c icns "$set_dir" -o src/stable/resources/darwin/code.icns
+    ;;
+esac
 # The Welcome tab and the title bar draw code-icon.svg. prepare_vscode.sh
 # copies src/stable/ over the Code OSS source, so the mark goes there too.
 # The mark is black on light and white on dark (brand 02-logo.md); dark
@@ -55,8 +84,6 @@ cp "$icons/mark-black.svg" "$letterpress/letterpress-light.svg"
 cp "$icons/mark-black.svg" "$letterpress/letterpress-hcLight.svg"
 cp "$icons/mark-white.svg" "$letterpress/letterpress-dark.svg"
 cp "$icons/mark-white.svg" "$letterpress/letterpress-hcDark.svg"
-# ponytail: macOS keeps VSCodium's code.icns until M8-02 builds on macOS
-# (iconutil there turns the 1024 px icon into an .icns).
 
 # Crewbo's patches to Code OSS go in as VSCodium user patches, applied after
 # its own (prepare_vscode.sh applies patches/user/*.patch last).
@@ -71,6 +98,9 @@ export ASSETS_REPOSITORY="crewbo/ide"
 export GH_REPO_PATH="crewbo/ide"
 export CI_BUILD="no"
 export SHOULD_BUILD="yes"
+# No remote server (REH): the preview has no remote development.
+export SHOULD_BUILD_REH="no"
+export SHOULD_BUILD_REH_WEB="no"
 export SKIP_ASSETS="yes"
 export SKIP_BUILD="no"
 export SKIP_SOURCE="no"
@@ -79,17 +109,8 @@ export VSCODE_QUALITY="stable"
 export VSCODE_SKIP_NODE_VERSION_CHECK="yes"
 export DISABLE_UPDATE="yes"
 export NODE_OPTIONS="--max-old-space-size=8192"
-case "$(uname -s)" in
-  Darwin) export OS_NAME="osx" ;;
-  MINGW* | MSYS* | CYGWIN*) export OS_NAME="windows" ;;
-  *) export OS_NAME="linux" ;;
-esac
-case "$(uname -m)" in
-  aarch64 | arm64) export VSCODE_ARCH="arm64" ;;
-  *) export VSCODE_ARCH="x64" ;;
-esac
 
-rm -rf vscode VSCode-*
+rm -rf vscode VSCode-* assets
 # VSCodium's scripts read unset variables; they are sourced, as dev/build.sh does.
 set +u
 . get_repo.sh
@@ -99,7 +120,8 @@ set -u
 
 # The Crewbo extension, built in: a .vsix is a zip whose extension/ folder
 # is the extension itself.
-out="$work/vscodium/VSCode-${OS_NAME}-${VSCODE_ARCH}"
+out="$work/vscodium/VSCode-${OS_NAME/osx/darwin}-${VSCODE_ARCH}"
+[[ "$OS_NAME" == "windows" ]] && out="$work/vscodium/VSCode-win32-${VSCODE_ARCH}"
 app="$out/resources/app"
 [[ "$OS_NAME" == "osx" ]] && app="$out/Crewbo IDE.app/Contents/Resources/app"
 rm -rf "$work/vsix" "$app/extensions/crewbo"
@@ -107,3 +129,24 @@ mkdir -p "$work/vsix"
 unzip -q "$vsix" -d "$work/vsix"
 cp -r "$work/vsix/extension" "$app/extensions/crewbo"
 echo "Built $out"
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  echo "release_version=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+fi
+
+if [[ "${CREWBO_ASSETS:-no}" == "yes" ]]; then
+  # VSCodium's per-OS packaging, after the extension is in: the packages are
+  # made from $out. Its top-level prepare_assets.sh is skipped because it
+  # also writes per-file checksums; the release job writes checksums.txt.
+  mkdir -p assets
+  (
+    set +u
+    export CI_BUILD="yes" # no snap
+    export SHOULD_BUILD_RPM="no" SHOULD_BUILD_MSI="no" SHOULD_BUILD_MSI_NOUP="no" SHOULD_BUILD_EXE_SYS="no"
+    case "$OS_NAME" in
+      osx) . build/osx/prepare_assets.sh ;;
+      windows) . build/windows/prepare_assets.sh ;;
+      *) . build/linux/prepare_assets.sh ;;
+    esac
+  )
+  ls -l assets
+fi
