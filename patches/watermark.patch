@@ -1,0 +1,20 @@
+--- a/src/vs/workbench/browser/parts/editor/media/editorgroupview.css
++++ b/src/vs/workbench/browser/parts/editor/media/editorgroupview.css
+@@ -149,6 +149,17 @@
+ 	background-image: url('./letterpress-hcDark.svg');
+ }
+ 
++/* Crewbo: the watermark is the brand mark, black on light and white on dark, drawn faint (crewbo docs/brand/DECISIONS.md BDR-021). */
++.monaco-workbench .part.editor > .content .editor-group-container > .editor-group-watermark-wrapper .editor-group-watermark .letterpress {
++	opacity: 0.1;
++}
++
++.monaco-workbench.vs-dark .part.editor > .content .editor-group-container > .editor-group-watermark-wrapper .editor-group-watermark .letterpress,
++.monaco-workbench.hc-light .part.editor > .content .editor-group-container > .editor-group-watermark-wrapper .editor-group-watermark .letterpress,
++.monaco-workbench.hc-black .part.editor > .content .editor-group-container > .editor-group-watermark-wrapper .editor-group-watermark .letterpress {
++	opacity: 0.3;
++}
++
+ .monaco-workbench .part.editor > .content .editor-group-container > .editor-group-watermark-wrapper .editor-group-watermark .shortcuts {
+ 	width: 100%;
+ }

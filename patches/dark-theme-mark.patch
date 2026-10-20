@@ -1,0 +1,18 @@
+--- a/src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css
++++ b/src/vs/workbench/browser/parts/titlebar/media/titlebarpart.css
+@@ -539,3 +539,15 @@
+ 	width: 12px;
+ 	height: 12px;
+ }
++
++/* Crewbo: the mark is black on light and white on dark (crewbo docs/brand/02-logo.md). */
++.monaco-workbench.vs-dark .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon:not(.codicon),
++.monaco-workbench.hc-black .part.titlebar > .titlebar-container > .titlebar-left > .window-appicon:not(.codicon),
++.monaco-workbench.vs-dark .part.banner .icon-container.custom-icon,
++.monaco-workbench.hc-black .part.banner .icon-container.custom-icon,
++.monaco-workbench.vs-dark .show-file-icons .vscode_getting_started_page-name-file-icon.file-icon::before,
++.monaco-workbench.hc-black .show-file-icons .vscode_getting_started_page-name-file-icon.file-icon::before,
++.monaco-workbench.vs-dark .show-file-icons .vs_code_editor_walkthrough\.md-name-file-icon.md-ext-file-icon.ext-file-icon.markdown-lang-file-icon.file-icon::before,
++.monaco-workbench.hc-black .show-file-icons .vs_code_editor_walkthrough\.md-name-file-icon.md-ext-file-icon.ext-file-icon.markdown-lang-file-icon.file-icon::before {
++	background-image: url('../../../media/code-icon-dark.svg');
++}

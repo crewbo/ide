@@ -39,8 +39,30 @@ for size in 256 512 1024; do
 done
 cp "$icons/app-icon-512.png" src/stable/resources/linux/code.png
 magick "$icons/app-icon-256.png" -define icon:auto-resize=256,128,64,48,32,16 src/stable/resources/win32/code.ico
+# The Welcome tab and the title bar draw code-icon.svg. prepare_vscode.sh
+# copies src/stable/ over the Code OSS source, so the mark goes there too.
+# The mark is black on light and white on dark (brand 02-logo.md); dark
+# themes switch to code-icon-dark.svg (patches/dark-theme-mark.patch).
+for tone in black white; do
+  curl -fsSL "${brand%/png}/svg/logo/mark-${tone}.svg" -o "$icons/mark-${tone}.svg"
+done
+cp "$icons/mark-black.svg" src/stable/src/vs/workbench/browser/media/code-icon.svg
+cp "$icons/mark-white.svg" src/stable/src/vs/workbench/browser/media/code-icon-dark.svg
+# The empty-editor watermark is the same mark, drawn faint by
+# patches/watermark.patch (brand BDR-021).
+letterpress=src/stable/src/vs/workbench/browser/parts/editor/media
+cp "$icons/mark-black.svg" "$letterpress/letterpress-light.svg"
+cp "$icons/mark-black.svg" "$letterpress/letterpress-hcLight.svg"
+cp "$icons/mark-white.svg" "$letterpress/letterpress-dark.svg"
+cp "$icons/mark-white.svg" "$letterpress/letterpress-hcDark.svg"
 # ponytail: macOS keeps VSCodium's code.icns until M8-02 builds on macOS
 # (iconutil there turns the 1024 px icon into an .icns).
+
+# Crewbo's patches to Code OSS go in as VSCodium user patches, applied after
+# its own (prepare_vscode.sh applies patches/user/*.patch last).
+mkdir -p patches/user
+rm -f patches/user/*.patch
+cp "$here"/patches/*.patch patches/user/
 
 export APP_NAME="CrewboIDE"
 export BINARY_NAME="crewbo-ide"
