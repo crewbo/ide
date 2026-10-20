@@ -1,0 +1,80 @@
+--- a/resources/linux/debian/control.template
++++ b/resources/linux/debian/control.template
+@@ -5,14 +5,11 @@
+ Recommends: @@RECOMMENDS@@
+ Priority: optional
+ Architecture: @@ARCHITECTURE@@
+-Maintainer: Microsoft Corporation <vscode-linux@microsoft.com>
+-Homepage: https://code.visualstudio.com/
++Maintainer: Crewbo https://github.com/crewbo/ide/issues
++Homepage: https://github.com/crewbo/ide
+ Installed-Size: @@INSTALLEDSIZE@@
+-Provides: visual-studio-@@NAME@@
+-Conflicts: visual-studio-@@NAME@@
+-Replaces: visual-studio-@@NAME@@
+-Description: Code editing. Redefined.
+- Visual Studio Code is a new choice of tool that combines the simplicity of
+- a code editor with what developers need for the core edit-build-debug cycle.
+- See https://code.visualstudio.com/docs/setup/linux for installation
+- instructions and FAQ.
++Description: Code editor with Crewbo built in
++ The Crewbo IDE is Code OSS with the Crewbo extension and its crew panel
++ built in: your team's coding agents, working in parallel without
++ collisions. See https://github.com/crewbo/ide for installation and
++ updates.
+--- a/resources/linux/code.appdata.xml
++++ b/resources/linux/code.appdata.xml
+@@ -4,15 +4,9 @@
+ 	<metadata_license>@@LICENSE@@</metadata_license>
+ 	<project_license>@@LICENSE@@</project_license>
+ 	<name>@@NAME_LONG@@</name>
+-	<url type="homepage">https://www.vscodium.com</url>
+-	<summary>VSCodium. Code editing. Redefined.</summary>
++	<url type="homepage">https://github.com/crewbo/ide</url>
++	<summary>Code editor with Crewbo built in</summary>
+ 	<description>
+-		<p>VSCodium is a community-driven, freely-licensed binary distribution of Microsoft's editor VS Code.</p>
++		<p>The Crewbo IDE is Code OSS with the Crewbo extension and its crew panel built in: your team's coding agents, working in parallel without collisions.</p>
+ 	</description>
+-	<screenshots>
+-		<screenshot type="default">
+-			<image>https://www.vscodium.com/img/vscodium.png</image>
+-			<caption>Editing C</caption>
+-		</screenshot>
+-	</screenshots>
+ </component>
+--- a/resources/linux/code.desktop
++++ b/resources/linux/code.desktop
+@@ -1,6 +1,6 @@
+ [Desktop Entry]
+ Name=@@NAME_LONG@@
+-Comment=Code Editing. Redefined.
++Comment=Code editor with Crewbo built in
+ GenericName=Text Editor
+ GenericName[ar]=محرر نصوص
+ Exec=@@EXEC@@ %F
+@@ -11,7 +11,7 @@
+ Categories=TextEditor;Development;IDE;
+ MimeType=text/plain;inode/directory;application/x-@@NAME@@-workspace;
+ Actions=new-empty-window;
+-Keywords=vscodium;codium;vscode;
++Keywords=crewbo;code;editor;
+ 
+ [Desktop Action new-empty-window]
+ Name=New Empty Window
+--- a/resources/linux/code-url-handler.desktop
++++ b/resources/linux/code-url-handler.desktop
+@@ -1,6 +1,6 @@
+ [Desktop Entry]
+ Name=@@NAME_LONG@@ - URL Handler
+-Comment=Code Editing. Redefined.
++Comment=Code editor with Crewbo built in
+ GenericName=Text Editor
+ Exec=@@EXEC@@ --open-url %U
+ Icon=@@ICON@@
+@@ -9,4 +9,4 @@
+ StartupNotify=true
+ Categories=Utility;TextEditor;Development;IDE;
+ MimeType=x-scheme-handler/@@URLPROTOCOL@@;
+-Keywords=vscodium;codium;vscode;
++Keywords=crewbo;code;editor;

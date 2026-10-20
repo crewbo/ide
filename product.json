@@ -3,6 +3,7 @@
   "nameLong": "Crewbo IDE",
   "applicationName": "crewbo-ide",
   "linuxIconName": "crewbo-ide",
+  "linuxDesktopName": "dev.crewbo.ide",
   "dataFolderName": ".crewbo-ide",
   "urlProtocol": "crewbo-ide",
   "serverApplicationName": "crewbo-ide-server",
