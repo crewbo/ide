@@ -98,10 +98,22 @@ jobs:
         with:
           name: vsix
           path: vsix
+      - id: crewbo
+        run: echo "ref=$(cat CREWBO_REF)" >> "$GITHUB_OUTPUT"
+      # The brand assets only; crewbo-core is private (ADR 0018).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: crewbo/crewbo-core
+          ref: ${{ steps.crewbo.outputs.ref }}
+          path: crewbo-brand
+          sparse-checkout: docs/brand/assets
+          ssh-key: ${{ secrets.CREWBO_CORE_DEPLOY_KEY }}
+          persist-credentials: false
       - name: Build and package
         id: build
         env:
           CREWBO_ASSETS: "yes"
+          CREWBO_BRAND_DIR: ${{ github.workspace }}/crewbo-brand/docs/brand/assets
           # VSCodium's scripts call the GitHub API; a token avoids rate limits.
           GITHUB_TOKEN: ${{ github.token }}
         run: |
