@@ -44,11 +44,14 @@ mv product.json.crewbo product.json
 
 # App icons from Crewbo's brand assets, unchanged; each OS's format is made
 # from the PNGs on that OS.
-brand="https://raw.githubusercontent.com/crewbo/crewbo/${crewbo_ref}/docs/brand/assets/png"
+# crewbo-core is private (ADR 0018), so the assets come from a checkout of it
+# (CI sets CREWBO_BRAND_DIR; locally, the sibling clone of crewbo-core).
+brand_dir="${CREWBO_BRAND_DIR:-$here/../crewbo/docs/brand/assets}"
+[ -d "$brand_dir/png" ] || { echo "brand assets not found at $brand_dir; set CREWBO_BRAND_DIR" >&2; exit 1; }
 icons="$work/icons"
 mkdir -p "$icons"
 for size in 256 512 1024; do
-  curl -fsSL "$brand/app-icon-${size}.png" -o "$icons/app-icon-${size}.png"
+  cp "$brand_dir/png/app-icon-${size}.png" "$icons/app-icon-${size}.png"
 done
 cp "$icons/app-icon-512.png" src/stable/resources/linux/code.png
 case "$OS_NAME" in
@@ -73,7 +76,7 @@ esac
 # The mark is black on light and white on dark (brand 02-logo.md); dark
 # themes switch to code-icon-dark.svg (patches/dark-theme-mark.patch).
 for tone in black white; do
-  curl -fsSL "${brand%/png}/svg/logo/mark-${tone}.svg" -o "$icons/mark-${tone}.svg"
+  cp "$brand_dir/svg/logo/mark-${tone}.svg" "$icons/mark-${tone}.svg"
 done
 cp "$icons/mark-black.svg" src/stable/src/vs/workbench/browser/media/code-icon.svg
 cp "$icons/mark-white.svg" src/stable/src/vs/workbench/browser/media/code-icon-dark.svg
